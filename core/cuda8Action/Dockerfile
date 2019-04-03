@@ -16,7 +16,7 @@ RUN pip install --no-cache-dir gevent==1.2.1 flask==0.12 requests==2.13.0
 ENV FLASK_PROXY_PORT 8080
 
 RUN mkdir -p /actionProxy
-ADD ../actionproxy.py /actionProxy/
+ADD actionproxy.py /actionProxy/
 
 RUN mkdir -p /action
 ADD stub.sh /action/exec
