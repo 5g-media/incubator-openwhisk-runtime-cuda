@@ -1,16 +1,18 @@
 # Cuda action example
 
-This example will guide you to create an action that adds elements of two arrays with a million elements each
+This example guides you through the creation of an action that adds elements of two arrays with a million elements each
 
-Example code is taken from a [easier-introduction-to-cuda](https://devblogs.nvidia.com/even-easier-introduction-cuda/) blog.
+Example code is taken from a [easier-introduction-to-cuda](https://devblogs.nvidia.com/even-easier-introduction-cuda/) blog and
+was slightly modified to conform an OpenWhisk action.
 
 ## Prepare the development environment
 
 ### Run the development container
 
-**Note:** You must run it from GPU node that contains the required Nvidia/Cuda drivers and nvidia-docker runtime (TODO: link)
+This command runs the cuda toolkit 8.0 development container passing it the local `~/.wskprops` to use Apache OpenWhisk
+credentials within.
 
-This command runs the container passing it the local `~/.wskprops` to use Apache OpenWhisk credentials within.
+**Note:** You must run it from GPU node that contains the required Nvidia/Cuda drivers and nvidia-docker (TODO: link)
 
 ```bash
 docker run -it -e OPENWHISK_AUTH=`cat ~/.wskprops | grep ^AUTH= | awk -F= '{print $2}'` -e OPENWHISK_APIHOST=`cat ~/.wskprops | grep ^APIHOST= | awk -F= '{print $2}'` --rm nvidia/cuda:8.0-devel-ubuntu16.04 /bin/bash
@@ -19,7 +21,7 @@ docker run -it -e OPENWHISK_AUTH=`cat ~/.wskprops | grep ^AUTH= | awk -F= '{prin
 ### Install required packages
 
 ```bash
-apt-get update && apt-get install -y vim curl zip
+apt-get update && apt-get install -y curl zip
 ```
 
 ### Install Apache OpenWhisk CLI
@@ -32,17 +34,21 @@ mv /tmp/wsk /usr/local/bin
 
 ### Configure CLI
 
-Refer to [configure-the-wsk-cli](https://github.com/apache/incubator-openwhisk-deploy-kube#configure-the-wsk-cli). This guide
-refers to `mycluster.yaml` of your OpenWhisk deployment.
+It will be used to create and invoke our action.
+
+```bash
+cat <<EOF > ~/.wskprops
+APIHOST=$OPENWHISK_APIHOST
+AUTH=$OPENWHISK_AUTH
+EOF
+```
 
 ### Create the example
 
-Copy the below block into `add.cu` 
+The below creates `add.cu` 
 
-**Note:** The application was slightly modified to return stringified JSON to be interpreted as
-an OpenWhisk action.
-
-```
+```bash
+cat <<EOF > /add.cu
 #include <iostream>
 #include <math.h>
 // Kernel function to add the elements of two arrays
@@ -86,9 +92,10 @@ int main(void)
   
   return 0;
 }
+EOF
 ```
 
-### Compile and test the code
+### Compile and run the code
 
 ```bash
 nvcc add.cu -o add_cuda
@@ -97,7 +104,7 @@ nvcc add.cu -o add_cuda
 
 Program should return `{"message": "Max error: 0"}`
 
-### Create initialization data via a (zip) file, similar to other actions kinds 
+### Create initialization data via a (zip) file, similar to other OpenWhisk action kinds 
 
 ```bash
 mv add_cuda exec
@@ -107,7 +114,20 @@ zip myAction.zip ./exec
 ### Create and invoke the action
 
 ```bash
-wsk action create cuda_Test myAction.zip --kind cuda:8@selector
-wsk -b action invoke cuda_Test
+wsk -i action create cuda_Test myAction.zip --kind cuda:8@selector
+wsk -ib action invoke cuda_Test
 ```
- 
+
+### Examin activation result
+
+Activation result should return success
+
+```
+    "response": {
+        "result": {
+            "message": "Max error: 0"
+        },
+        "status": "success",
+        "success": true
+    },
+```
