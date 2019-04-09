@@ -1,133 +1,24 @@
-# Cuda action example
+# Cuda Action
 
-This example guides you through the creation of an action that adds elements of two arrays with a million elements each
+This image contains libraries and frameworks useful for running Cuda actions and is based on [8.0-runtime-ubuntu16.04](https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/8.0/runtime/Dockerfile)
 
-Example code is taken from a [easier-introduction-to-cuda](https://devblogs.nvidia.com/even-easier-introduction-cuda/) blog and
-was slightly modified to conform an OpenWhisk action.
+Bellow are the versions for the included libraries:
 
-## Prepare the development environment
+| Cuda Version | Package | Notes |
+| ------------- | ------- | ----- |
+| 8.0.61  | Cuda-toolkit 8.0, ... | Based on Ubuntu 16.04
 
-### Run the development container
 
-This command runs the cuda toolkit 8.0 development container passing it the local `~/.wskprops` to use Apache OpenWhisk
-credentials within.
+#### Cuda Action Sample
 
-**Note:** You must run it from GPU node that contains the required Nvidia/Cuda drivers and nvidia-docker (TODO: link)
+To view an example check the [sample/multiplying-arrays-with-cuda](./sample/README.md) and follow the instructions.
 
-```bash
-docker run -it -e OPENWHISK_AUTH=`cat ~/.wskprops | grep ^AUTH= | awk -F= '{print $2}'` -e OPENWHISK_APIHOST=`cat ~/.wskprops | grep ^APIHOST= | awk -F= '{print $2}'` --rm nvidia/cuda:8.0-devel-ubuntu16.04 /bin/bash
-```
+### 8.0.61 Details
 
-### Install required packages
+#### Available Ubuntu packages
 
-```bash
-apt-get update && apt-get install -y curl zip
-```
-
-### Install Apache OpenWhisk CLI
+For a complete list execute:
 
 ```bash
-curl -L https://github.com/apache/incubator-openwhisk-cli/releases/download/latest/OpenWhisk_CLI-latest-linux-amd64.tgz -o /tmp/wsk.tgz
-tar xvfz /tmp/wsk.tgz -C /tmp/
-mv /tmp/wsk /usr/local/bin
-```
-
-### Configure CLI
-
-It will be used to create and invoke our action.
-
-```bash
-cat <<EOF > ~/.wskprops
-APIHOST=$OPENWHISK_APIHOST
-AUTH=$OPENWHISK_AUTH
-EOF
-```
-
-### Create the example
-
-The below creates `add.cu` 
-
-```bash
-cat <<EOF > /add.cu
-#include <iostream>
-#include <math.h>
-// Kernel function to add the elements of two arrays
-__global__
-void add(int n, float *x, float *y)
-{
-  for (int i = 0; i < n; i++)
-    y[i] = x[i] + y[i];
-}
-
-int main(void)
-{
-  int N = 1<<20;
-  float *x, *y;
-
-  // Allocate Unified Memory . accessible from CPU or GPU
-  cudaMallocManaged(&x, N*sizeof(float));
-  cudaMallocManaged(&y, N*sizeof(float));
-
-  // initialize x and y arrays on the host
-  for (int i = 0; i < N; i++) {
-    x[i] = 1.0f;
-    y[i] = 2.0f;
-  }
-
-  // Run kernel on 1M elements on the GPU
-  add<<<1, 1>>>(N, x, y);
-
-  // Wait for GPU to finish before accessing on host
-  cudaDeviceSynchronize();
-
-  // Check for errors (all values should be 3.0f)
-  float maxError = 0.0f;
-  for (int i = 0; i < N; i++)
-    maxError = fmax(maxError, fabs(y[i]-3.0f));
-  std::cout << "{\"message\": \"Max error: " << maxError << "\"}";
-
-  // Free memory
-  cudaFree(x);
-  cudaFree(y);
-  
-  return 0;
-}
-EOF
-```
-
-### Compile and run the code
-
-```bash
-nvcc add.cu -o add_cuda
-./add_cuda
-```
-
-Program should return `{"message": "Max error: 0"}`
-
-### Create initialization data via a (zip) file, similar to other OpenWhisk action kinds 
-
-```bash
-mv add_cuda exec
-zip myAction.zip ./exec
-```
-
-### Create and invoke the action
-
-```bash
-wsk -i action create cuda_Test myAction.zip --kind cuda:8@selector
-wsk -ib action invoke cuda_Test
-```
-
-### Examin activation result
-
-Activation result should return success
-
-```
-    "response": {
-        "result": {
-            "message": "Max error: 0"
-        },
-        "status": "success",
-        "success": true
-    },
+$ docker run --rm --entrypoint apt whisk/cuda8action list --installed
 ```
