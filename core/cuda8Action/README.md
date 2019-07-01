@@ -6,7 +6,7 @@ Bellow are the versions for the included libraries:
 
 | Cuda Version | Package | Notes |
 | ------------- | ------- | ----- |
-| 8.0.61  | Cuda-toolkit 8.0, ... | Based on Ubuntu 16.04
+| 8.0.61  | Cuda-toolkit 8.0 | Based on Ubuntu 16.04
 
 
 #### Cuda Action Sample

@@ -5,25 +5,7 @@ This example guides you through the creation of an action that adds elements of 
 Example code is taken from a [easier-introduction-to-cuda](https://devblogs.nvidia.com/even-easier-introduction-cuda/) blog and
 was slightly modified to conform an OpenWhisk action.
 
-## Prerequisites: Kubernetes and GPU nodes
-
-### Kubernetes
-
-Your first step is to create a Kubernetes cluster that is capable of supporting an OpenWhisk deployment. Then you
-should deploy OpenWhisk control plane on your Kubernetes cluster using the forked [incubator-openwhisk-deploy-kube](https://github.com/5g-media/incubator-openwhisk-deploy-kube/tree/cuda-v0.1) which already supports
-invoking actions on GPU Kubernetes nodes.
-
-**Remark:** In our validation tests, we deployed Kubernetes cluster via [kubeadm](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/)
-
-### GPU nodes
-
-It is assumed that you already joined the nodes to the Kubernetes cluster as you normally do (e.g. via kubeadm join).
-
-Your next step would be to register them as GPU nodes. For that, you need to install nvidia drivers
-and nvidia-docker in each GPU node you have joined, deploy k8s-nvidia-plugin and properly label your nodes.
-
-* Follow the [Kubernetes Schedule GPUs](https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/) guide, in particular pay attention to [Official NVIDIA GPU device plugin](https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/#official-nvidia-gpu-device-plugin) section that details the requirements.
-* For each GPU node you want to invoke actions, execute: `kubectl label nodes <GPU_NODE_NAME> cuda8=true`
+Ensure the following [prerequisites](https://github.com/5g-media/incubator-openwhisk-deploy-kube/blob/gpu/docs/k8s-gpu-prerequisites.md) are met before attempting to invoke the action.
 
 ## Prepare the development environment
 
@@ -31,8 +13,7 @@ Now that you have setup your OpenWhisk deployment its time to create your first 
 
 ### Run the development container
 
-This command runs the cuda toolkit 8.0 development container passing it the local `~/.wskprops` to use Apache OpenWhisk
-credentials within.
+This command runs the cuda toolkit 8.0 development container that contains the tools needed to compile the example code. We pass it the local `~/.wskprops` to run the action from within the container.
 
 ```bash
 docker run -it -e OPENWHISK_AUTH=`cat ~/.wskprops | grep ^AUTH= | awk -F= '{print $2}'` -e OPENWHISK_APIHOST=`cat ~/.wskprops | grep ^APIHOST= | awk -F= '{print $2}'` --rm nvidia/cuda:8.0-devel-ubuntu16.04 /bin/bash
@@ -143,7 +124,7 @@ Creating the action under kind `cuda:8@selector` tells OpenWhisk to invoke the a
 that you already labeled at the above "Prerequisites" step.
 
 ```bash
-wsk -i action create cuda_Test myAction.zip --kind cuda:8@selector
+wsk -i action create cuda_Test myAction.zip --kind cuda:8@gpu
 ```
 
 ### Invoke the action
@@ -172,3 +153,4 @@ You can view your action running (/action/exec under Process name) via nvidia-sm
 * You may need to invoke your action multiple times for it to appear due to its short liveliness
 
 ![alt text](nvidia-smi.bmp)
+

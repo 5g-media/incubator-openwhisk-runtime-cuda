@@ -15,8 +15,8 @@ RUN pip install --no-cache-dir gevent==1.2.1 flask==0.12 requests==2.13.0
 # Do not modify - this is the internal openwhisk invoker service port
 ENV FLASK_PROXY_PORT 8080
 
-RUN mkdir -p /actionProxy
-ADD actionproxy.py /actionProxy/
+# Add the action proxy
+ADD https://raw.githubusercontent.com/apache/incubator-openwhisk-runtime-docker/master/core/actionProxy/actionproxy.py /actionProxy/actionproxy.py
 
 RUN mkdir -p /action
 ADD stub.sh /action/exec
