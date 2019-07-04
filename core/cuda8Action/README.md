@@ -20,5 +20,5 @@ To view an example check the [sample/multiplying-arrays-with-cuda](./sample/READ
 For a complete list execute:
 
 ```bash
-$ docker run --rm --entrypoint apt whisk/cuda8action list --installed
+$ docker run --rm --entrypoint apt docker5gmedia/cuda8action list --installed
 ```

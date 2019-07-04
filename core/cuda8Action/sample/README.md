@@ -130,7 +130,7 @@ wsk -i action create cuda_Test myAction.zip --kind cuda:8@gpu
 ### Invoke the action
 
 ```bash
-wsk -i -b action invoke cuda_Test
+wsk -i action invoke -b cuda_Test
 ```
 
 ### Examine activation result
