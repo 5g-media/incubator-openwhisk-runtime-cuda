@@ -13,10 +13,11 @@ Now that you have setup your OpenWhisk deployment its time to create your first 
 
 ### Run the development container
 
-This command runs the cuda toolkit 8.0 development container that contains the tools needed to compile the example code. We pass it the local `~/.wskprops` to run the action from within the container.
+This command runs the cuda toolkit 8.0 development container that contains the tools needed to compile the example code. We pass it the well-known [guest token](https://github.com/5g-media/incubator-openwhisk/blob/master/ansible/files/auth.guest) and
+the ip port of OpenWhisk controller. If your OpenWhisk deployed on Minikube per prequisites instructions above then run `docker run` command as is.
 
 ```bash
-docker run -it -e OPENWHISK_AUTH=`cat ~/.wskprops | grep ^AUTH= | awk -F= '{print $2}'` -e OPENWHISK_APIHOST=`cat ~/.wskprops | grep ^APIHOST= | awk -F= '{print $2}'` --rm nvidia/cuda:8.0-devel-ubuntu16.04 /bin/bash
+docker run -it -e OPENWHISK_AUTH=23bc46b1-71f6-4ed5-8c54-816aa4f8c502:123zO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP -e OPENWHISK_APIHOST=`sudo minikube ip`:31001 --rm nvidia/cuda:8.0-devel-ubuntu16.04 /bin/bash
 ```
 
 Run all following commands from inside the container.
@@ -119,9 +120,6 @@ zip myAction.zip ./exec
 ```
 
 ### Create the action with the above initialization data
-
-Creating the action under kind `cuda:8@selector` tells OpenWhisk to invoke the action on Kubernetes GPU nodes
-that you already labeled at the above "Prerequisites" step.
 
 ```bash
 wsk -i action create cuda_Test myAction.zip --kind cuda:8@gpu
