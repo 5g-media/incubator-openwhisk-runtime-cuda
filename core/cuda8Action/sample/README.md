@@ -14,7 +14,10 @@ Now that you have setup your OpenWhisk deployment its time to create your first 
 ### Run the development container
 
 This command runs the cuda toolkit 8.0 development container that contains the tools needed to compile the example code. We pass it the well-known [guest token](https://github.com/5g-media/incubator-openwhisk/blob/master/ansible/files/auth.guest) and
-the ip port of OpenWhisk controller. If your OpenWhisk deployed on Minikube per prequisites instructions above then run `docker run` command as is.
+the ip:port of OpenWhisk controller (Igress).
+
+If are using [Minikube](https://github.com/5g-media/incubator-openwhisk-deploy-kube/blob/gpu/docs/k8s-gpu-prerequisites.md#minikube) per prequisites above then run the below
+command as is. Otherwise, replace `<sudo minikube ip:31001>` with your OpenWhisk Ingress (ip:port) accessed from your Kubernetes cluster.
 
 ```bash
 docker run -it -e OPENWHISK_AUTH=23bc46b1-71f6-4ed5-8c54-816aa4f8c502:123zO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP -e OPENWHISK_APIHOST=`sudo minikube ip`:31001 --rm nvidia/cuda:8.0-devel-ubuntu16.04 /bin/bash
