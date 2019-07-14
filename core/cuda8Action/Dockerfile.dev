@@ -1,0 +1,19 @@
+FROM nvidia/cuda:8.0-devel-ubuntu16.04
+
+RUN apt-get update && apt-get install -y curl zip \
+    git
+
+RUN curl -L https://github.com/apache/incubator-openwhisk-cli/releases/download/latest/OpenWhisk_CLI-latest-linux-amd64.tgz -o /tmp/wsk.tgz
+RUN tar xvfz /tmp/wsk.tgz -C /tmp/
+RUN mv /tmp/wsk /usr/local/bin
+
+RUN git clone https://github.com/5g-media/incubator-openwhisk-runtime-python.git && \
+    cd incubator-openwhisk-runtime-python && \
+    git checkout gpu
+
+
+COPY entrypoint.sh /
+RUN chmod u+x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/bin/bash"]

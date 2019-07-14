@@ -7,29 +7,21 @@ was slightly modified to conform an OpenWhisk action.
 
 Ensure the following [prerequisites](https://github.com/5g-media/incubator-openwhisk-deploy-kube/blob/gpu/docs/k8s-gpu-prerequisites.md) are met before attempting to invoke the action.
 
-## Prepare the development environment
+Now that you have setup your OpenWhisk deployment its time to create your first Cuda action.
 
-Now that you have setup your OpenWhisk deployment its time to create your first Cuda action. Log into one of your GPU nodes and follow the below instructions
+Log into one of your GPU nodes and follow the below instructions
 
-### Run the development container
+## Run the development container
 
-This command runs the cuda toolkit 8.0 development container that contains the tools needed to compile the example code. We pass it the well-known [guest token](https://github.com/5g-media/incubator-openwhisk/blob/master/ansible/files/auth.guest) and
-the ip:port of OpenWhisk controller (Igress).
+This command runs a playbox container that extends the cuda toolkit 8.0 development image that contains the tools needed to compile the example code. We pass it the the ip:port of OpenWhisk controller (Ingress).
 
-If are using [Minikube](https://github.com/5g-media/incubator-openwhisk-deploy-kube/blob/gpu/docs/k8s-gpu-prerequisites.md#minikube) per prequisites above then run the below
-command as is. Otherwise, replace `<sudo minikube ip:31001>` with your OpenWhisk Ingress (ip:port) accessed from your Kubernetes cluster.
+If you are running Minikube per [prerequisites](https://github.com/5g-media/incubator-openwhisk-deploy-kube/blob/gpu/docs/k8s-gpu-prerequisites.md#minikube) requirements then simply invoke the below command as is. Otherwise, substitute `sudo minikube ip`:31001 with ip:port of your OpenWhisk controller IP address and port.
 
 ```bash
-docker run -it -e OPENWHISK_AUTH=23bc46b1-71f6-4ed5-8c54-816aa4f8c502:123zO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP -e OPENWHISK_APIHOST=`sudo minikube ip`:31001 --rm nvidia/cuda:8.0-devel-ubuntu16.04 /bin/bash
+docker run -it -e OPENWHISK_APIHOST=`sudo minikube ip`:31001 --rm docker5gmedia/5gmedia-playbox-minikube-ow-gpu:1.0 /bin/bash
 ```
 
-Run all following commands from inside the container.
-
-### Install required packages
-
-```bash
-apt-get update && apt-get install -y curl zip
-```
+Run all the following commands from inside the container.
 
 ## Develop the action
 
@@ -96,25 +88,6 @@ Program should return `{"message": "Max error: 0"}`
 
 ## Package the code as OpenWhisk cuda action
 
-### Install Apache OpenWhisk CLI
-
-```bash
-curl -L https://github.com/apache/incubator-openwhisk-cli/releases/download/latest/OpenWhisk_CLI-latest-linux-amd64.tgz -o /tmp/wsk.tgz
-tar xvfz /tmp/wsk.tgz -C /tmp/
-mv /tmp/wsk /usr/local/bin
-```
-
-### Configure CLI
-
-We will use the CLI to create and invoke our action
-
-```bash
-cat <<EOF > ~/.wskprops
-APIHOST=$OPENWHISK_APIHOST
-AUTH=$OPENWHISK_AUTH
-EOF
-```
-
 ### Create initialization data via a (zip) file, similar to other OpenWhisk action kinds 
 
 ```bash
@@ -150,8 +123,7 @@ Activation result returns success and JSON result of the invoked action
 
 You can view your action running (/action/exec under Process name) via nvidia-smi utility.
 
-* You should invoke `sudo watch nvidia-smi` on all of your GPU nodes because we do not know which host is selected to run the action
+* You should invoke `sudo watch nvidia-smi` on **all of your GPU nodes** because we do not know which host is selected to run the action
 * You may need to invoke your action multiple times for it to appear due to its short liveliness
 
 ![alt text](nvidia-smi.bmp)
-
