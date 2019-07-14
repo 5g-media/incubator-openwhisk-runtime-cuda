@@ -5,15 +5,13 @@ This example guides you through the creation of an action that adds elements of 
 Example code is taken from a [easier-introduction-to-cuda](https://devblogs.nvidia.com/even-easier-introduction-cuda/) blog and
 was slightly modified to conform an OpenWhisk action.
 
-Ensure the following [prerequisites](https://github.com/5g-media/incubator-openwhisk-deploy-kube/blob/gpu/docs/k8s-gpu-prerequisites.md) are met before attempting to invoke the action.
-
-Now that you have setup your OpenWhisk deployment its time to create your first Cuda action.
+Ensure the following [prerequisites](https://github.com/5g-media/incubator-openwhisk-deploy-kube/blob/gpu/docs/k8s-gpu-prerequisites.md) are met before attempting to invoke the action. Now that you have setup your OpenWhisk deployment its time to create your first Cuda action.
 
 Log into one of your GPU nodes and follow the below instructions
 
 ## Run the development container
 
-This command runs a playbox container that extends the cuda toolkit 8.0 development image that contains the tools needed to compile the example code. We pass it the the ip:port of OpenWhisk controller (Ingress).
+This command runs a playbox container that extends the cuda toolkit 8.0 development image that contains the tools (e.g. `nvcc` compiler, `wsk` OpenWhisk CLI) needed to compile the example code. We pass it the ip:port of OpenWhisk controller (Ingress).
 
 If you are running Minikube per [prerequisites](https://github.com/5g-media/incubator-openwhisk-deploy-kube/blob/gpu/docs/k8s-gpu-prerequisites.md#minikube) requirements then simply invoke the below command as is. Otherwise, substitute `sudo minikube ip`:31001 with ip:port of your OpenWhisk controller IP address and port.
 
